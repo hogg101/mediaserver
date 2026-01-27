@@ -1,0 +1,157 @@
+# Define all the services (containers) that make up your application stack.
+services:
+  # This is the VPN gateway container. All other services will connect through it.
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    # 'NET_ADMIN' capability is required for Gluetun to manage network interfaces and create the VPN >
+    cap_add:
+      - NET_ADMIN
+    # Persist Gluetun's generated configuration files across restarts.
+    volumes:
+      - ./config/gluetun:/gluetun
+    environment:
+      # --- VPN Configuration ---
+      # Set the VPN provider to Surfshark.
+      - VPN_SERVICE_PROVIDER=surfshark
+      # Specify the VPN protocol to use.
+      - VPN_TYPE=wireguard
+      
+      # --- Credentials (You must fill these in!) ---
+      # Your WireGuard private key from your Surfshark account dashboard.
+      - WIREGUARD_PRIVATE_KEY=eD8drTFUe2heWEqSRuKaXpytHm1hv0YhLAaNrXT/YkQ=
+      # The WireGuard IP address assigned to you, also from your Surfshark account.
+      - WIREGUARD_ADDRESSES=10.14.0.2/16
+
+      # --- Server Selection ---
+      # Connect to a specific city. You can change this to another city like "Manchester".
+      #- SERVER_CITIES=London
+      - SERVER_COUNTRIES=United Kingdom
+      # Alternatively, you can comment out SERVER_CITIES and use SERVER_COUNTRIES=United Kingdom
+
+      # --- General Settings ---
+      # Set your local timezone for accurate logs.
+      - TZ=Europe/London
+      # Set the user and group ID for file permissions to match your host user.
+      - PUID=1000
+      - PGID=1000
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.11.0/24
+    ports:
+      # --- Port Forwarding for your other containers ---
+      # These ports are exposed on the host and forwarded through the VPN to the appropriate service.
+      - 8081:8081      # qBittorrent WebUI
+      - 6881:6881      # qBittorrent listening port (TCP)
+      - 6881:6881/udp  # qBittorrent listening port (UDP)
+      - 9696:9696      # Prowlarr WebUI
+    # Ensures the container restarts automatically if it crashes or the server reboots.
+    restart: unless-stopped
+
+  # This service's traffic will be routed through the VPN.
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent
+    container_name: qbittorrent
+    # This is the key setting: it forces this container to use Gluetun's network stack.
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      # This tells qBittorrent which port to run its web UI on inside the container.
+      - WEBUI_PORT=8081
+    volumes:
+      # Persist qBittorrent's configuration.
+      - ./config/qbittorrent:/config
+      # Your main media library.
+      - /mnt/ext_ssd/media:/data
+    # This ensures Gluetun is running and connected before qBittorrent starts.
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+    # NOTE: There is NO 'ports' section here because Gluetun manages the ports for this service.
+
+  # This service's traffic will also be routed through the VPN.
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr
+    container_name: prowlarr
+    # Force this container to use Gluetun's network stack.
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      # Persist Prowlarr's configuration.
+      - ./config/prowlarr:/config
+    # Ensures Gluetun is running before Prowlarr starts.
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+    # NOTE: No 'ports' section here either; ports are managed by Gluetun.
+
+  # --- These services are NOT behind the VPN ---
+  # They will use your regular internet connection.
+
+  radarr:
+    image: lscr.io/linuxserver/radarr
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - ./config/radarr:/config
+      - /mnt/ext_ssd/media:/data
+    # This service manages its own ports directly.
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - ./config/sonarr:/config
+      - /mnt/ext_ssd/media:/data
+    # This service manages its own ports directly.
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+    volumes:
+      - ./config/bazarr:/config
+      - /mnt/ext_ssd/media:/data
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - JELLYFIN_PublishedServerUrl=http://192.168.11.30:8096
+    group_add:
+      - "1000"
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ./config/jellyfin:/config
+      - /srv/docker/mediaserver/cache/jellyfin:/cache
+      - /mnt/ext_ssd/media:/data
+    ports:
+      - 8096:8096/tcp
+      - 7359:7359/udp # Jellyfin client discovery
+    restart: unless-stopped
