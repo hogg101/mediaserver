@@ -122,17 +122,26 @@ services:
     restart: unless-stopped
 
   plex:
-    image: lscr.io/linuxserver/plex
+    image: plexinc/pms-docker
     container_name: plex
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=Europe/London
       # Optional: add a claim token for initial setup
-      # - PLEX_CLAIM=claim-xxxxxxxxxxxxxxxxxxxx
+      - PLEX_CLAIM=claim-cXsyVMt-dtj-zWRSXGbG
+      # Optional: advertise the host IP for client discovery
+      - ADVERTISE_IP=http://192.168.11.30:32400/
     volumes:
       - ./config/plex:/config
       - /mnt/ext_ssd/media:/data
     ports:
       - 32400:32400/tcp
+      #- 3005:3005/tcp
+      #- 8324:8324/tcp
+      #- 32469:32469/tcp
+      #- 1900:1900/udp
+      #- 32410:32410/udp
+      #- 32412:32412/udp
+      #- 32413:32413/udp
+      #- 32414:32414/udp
+    hostname: busybee
     restart: unless-stopped
