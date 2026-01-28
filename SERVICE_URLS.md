@@ -5,5 +5,4 @@
 - Prowlarr: http://busybee.local:9696
 - Radarr: http://busybee.local:7878
 - Sonarr: http://busybee.local:8989
-- Bazarr: http://busybee.local:6767
-- Jellyfin: http://busybee.local:8096
+- Plex: http://busybee.local:32400/web

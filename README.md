@@ -11,6 +11,7 @@ This project sets up a complete media server environment with the following comp
 - **Prowlarr**: Indexer manager for automated media downloads
 - **Radarr**: Movie collection manager
 - **Sonarr**: TV show collection manager
+- **Plex**: Media server
 - **Dashboard**: Web interface to monitor and access all services
 
 ## Prerequisites
@@ -59,14 +60,8 @@ This project sets up a complete media server environment with the following comp
 - Direct internet connection (no VPN)
 - Monitors and organizes TV show downloads
 
-### Bazarr
-- Web interface accessible at `http://localhost:6767`
-- Manages subtitle downloads for Radarr and Sonarr
-- Direct internet connection (no VPN)
-
-### Jellyfin
-- Web interface accessible at `http://localhost:8096`
-- Uses Intel iGPU for hardware transcoding (via `/dev/dri`)
+### Plex
+- Web interface accessible at `http://localhost:32400/web`
 - Media library at `/mnt/ext_ssd/media`
 
 ## Setup Instructions
@@ -79,7 +74,7 @@ This project sets up a complete media server environment with the following comp
 
 3. Create necessary directories:
    ```bash
-   mkdir -p config /srv/docker/mediaserver/cache/jellyfin
+   mkdir -p config
    ```
 
 4. Start the services:
@@ -104,14 +99,12 @@ Each service's configuration is stored in the `config/` directory:
 - `config/prowlarr/`: Indexer settings
 - `config/radarr/`: Movie management settings
 - `config/sonarr/`: TV show management settings
-- `config/bazarr/`: Subtitle management settings
-- `config/jellyfin/`: Jellyfin settings and database
+- `config/plex/`: Plex settings and database
 
 ### Storage Layout (Busybee)
 - Configs (git-backed): `/home/james/docker/mediaserver/config`
 - Media: `/mnt/ext_ssd/media`
 - Downloads: `/mnt/ext_ssd/media/downloads`
-- Jellyfin cache: `/srv/docker/mediaserver/cache/jellyfin`
 
 ### Hardlink-Friendly Paths
 - Host mount: `/mnt/ext_ssd/media`

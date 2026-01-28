@@ -121,37 +121,18 @@ services:
       - 8989:8989
     restart: unless-stopped
 
-  bazarr:
-    image: lscr.io/linuxserver/bazarr
-    container_name: bazarr
+  plex:
+    image: lscr.io/linuxserver/plex
+    container_name: plex
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
+      # Optional: add a claim token for initial setup
+      # - PLEX_CLAIM=claim-xxxxxxxxxxxxxxxxxxxx
     volumes:
-      - ./config/bazarr:/config
+      - ./config/plex:/config
       - /mnt/ext_ssd/media:/data
     ports:
-      - 6767:6767
-    restart: unless-stopped
-
-  jellyfin:
-    image: lscr.io/linuxserver/jellyfin
-    container_name: jellyfin
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/London
-      - JELLYFIN_PublishedServerUrl=http://192.168.11.30:8096
-    group_add:
-      - "1000"
-    devices:
-      - /dev/dri:/dev/dri
-    volumes:
-      - ./config/jellyfin:/config
-      - /srv/docker/mediaserver/cache/jellyfin:/cache
-      - /mnt/ext_ssd/media:/data
-    ports:
-      - 8096:8096/tcp
-      - 7359:7359/udp # Jellyfin client discovery
+      - 32400:32400/tcp
     restart: unless-stopped
