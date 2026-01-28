@@ -60,11 +60,16 @@ config/qbittorrent/**/*.torrent
 config/qbittorrent/**/*.fastresume
 
 # Jellyfin large data stores
+config/jellyfin/.aspnet/
+config/jellyfin/.cache/
+config/jellyfin/.jellyfin-config
 config/jellyfin/cache/
 config/jellyfin/log/
 config/jellyfin/data/data/
 config/jellyfin/data/metadata/
 config/jellyfin/data/transcodes/
+config/jellyfin/data/.jellyfin-data
+config/jellyfin/data/root/
 config/jellyfin/data/plugins/*
 !config/jellyfin/data/plugins/configurations/
 !config/jellyfin/data/plugins/configurations/**
@@ -77,6 +82,12 @@ config/prowlarr/Sentry/
 config/bazarr/cache/
 config/bazarr/db/
 config/bazarr/log/
+config/bazarr/config/analytics_visitor_id.txt
 
 # ASP.NET data protection keys (often contain secrets)
 **/asp/
+
+# qBittorrent runtime state
+config/qbittorrent/**/lockfile
+config/qbittorrent/**/rss/
+config/qbittorrent/**/watched_folders.json
