@@ -26,7 +26,6 @@ This project sets up a complete media server environment with the following comp
 .
 ├── config/           # Configuration files for all services (git-backed)
 ├── compose.yml
-└── dashboard.html    # Web dashboard interface
 ```
 
 ## Services
@@ -105,10 +104,11 @@ Each service's configuration is stored in the `config/` directory:
 - `config/prowlarr/`: Indexer settings
 - `config/radarr/`: Movie management settings
 - `config/sonarr/`: TV show management settings
+- `config/bazarr/`: Subtitle management settings
 - `config/jellyfin/`: Jellyfin settings and database
 
 ### Storage Layout (Busybee)
-- Configs (git-backed): `/home/james/docker/config`
+- Configs (git-backed): `/home/james/docker/mediaserver/config`
 - Media: `/mnt/ext_ssd/media`
 - Downloads: `/mnt/ext_ssd/media/downloads`
 - Jellyfin cache: `/srv/docker/mediaserver/cache/jellyfin`
